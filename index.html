@@ -1,0 +1,309 @@
+<meta charset="utf-8">
+<style> /* set the CSS */
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 2px;
+}
+
+.axisClass path{
+  stroke: red;
+  }
+.axisClass line{
+  stroke: red;
+  }
+
+.axisAgent path{
+  stroke: Orange;
+  }
+.axisAgent line{
+  stroke: Orange;
+  }
+  
+.axisTotal path{
+  stroke: green;
+  }
+.axisTotal line{
+  stroke: green;
+  }
+.axistext{
+  fill: black;
+  font: 12px sans-serif;
+  text-anchor: end;
+  }
+ .chartText{
+  font: 12px sans-serif;
+  }
+</style>
+<body>
+
+<!-- load the d3.js library -->    	
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+var tdata = [
+  {year:96,cla:86585,agt:8613,ttl:152604},
+  {year:97,cla:85741,agt:9172,ttl:152677},
+  {year:98,cla:84753,agt:9954,ttl:152490},
+  {year:99,cla:83696,agt:12821,ttl:152080},
+  {year:100,cla:82506,agt:13888,ttl:151141},
+  {year:101,cla:80692,agt:14277,ttl:150595},
+  {year:102,cla:79049,agt:15170,ttl:147644},
+  {year:103,cla:77499,agt:16229,ttl:147971},
+  {year:104,cla:75154,agt:15705,ttl:145087},
+  {year:105,cla:72460,agt:15185,ttl:141730}
+];
+
+// set the dimensions and margins of the graph
+var margin = {top: 20, right: 65, bottom: 60, left: 50},
+    width = 700 - margin.left - margin.right,
+    height = 300 - margin.top - margin.bottom;
+
+
+// set the ranges
+var x = d3.scaleTime().range([margin.left-30, width-margin.right-20]);
+  x = d3.scaleLinear().rangeRound([margin.left-30, width-margin.right-50])
+var y0 = d3.scaleLinear().range([height-30, 0]);
+var y1 = d3.scaleLinear().range([height-20, 0]);
+var y2 = d3.scaleLinear().range([height-20, 10]);
+
+// define the 1st line
+var valueline = d3.line()
+    .x(function(d) { return x(d.year); })
+    .y(function(d) { return y0(d.cla); });
+
+// define the 2nd line
+var valueline2 = d3.line()
+    .x(function(d) { return x(d.year); })
+    .y(function(d) { return y1(d.agt); });
+  
+var valueline3 = d3.line()
+    .x(function(d) { return x(d.year); })
+    .y(function(d) { return y2(d.ttl); });
+
+// append the svg obgect to the body of the page
+// appends a 'group' element to 'svg'
+// moves the 'group' element to the top left margin
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+  
+
+  // Scale the range of the data
+  x.domain(d3.extent(tdata, function(d) { return d.year; }));
+  y0.domain([d3.min(tdata, function(d) {return d.cla;}), d3.max(tdata, function(d) {return d.cla;})]);
+  y1.domain([d3.min(tdata, function(d) {return d.agt; }), d3.max(tdata, function(d) {return d.agt; })]);
+  y2.domain([d3.min(tdata, function(d) {return d.ttl; }), d3.max(tdata, function(d) {return d.ttl; })]);
+
+  // Add the valueline path.
+  svg.append("path")
+      .data([tdata])
+      .attr("class", "line")
+      .style("stroke", "red")
+      .attr("d", valueline)
+      .attr("tag","cla");
+
+  // Add the valueline2 path.
+  svg.append("path")
+      .data([tdata])
+      .attr("class", "line")
+      .style("stroke", "orange")
+      .attr("d", valueline2)
+      .attr("tag","agt");
+  
+  // Add the valueline3 path.
+  svg.append("path")
+      .data([tdata])
+      .attr("class", "line")
+      .style("stroke", "green")
+      .attr("d", valueline3)
+      .attr("tag","ttl");
+
+  // Add the X Axis
+  svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x).ticks(6));
+  svg.append("text")
+      .attr("class","axistext")
+      .attr("x", 10)
+      .attr("y", height+15)
+      .attr("text-anchor", "end")
+      .text("年度");  
+
+  // Add the Y0 Axis
+  svg.append("g")
+      .attr("class", "axisClass")
+      .call(d3.axisLeft(y0))
+  svg.append("text")
+      .attr("class","axistext")
+      .attr("x", 0)
+      .attr("y", -5)
+      .attr("text-anchor", "end")
+      .text("班級數");
+  // Add the Y1 Axis
+  svg.append("g")
+      .attr("class", "axisAgent")
+      .attr("transform", "translate( " + width + ", 0 )")
+      .call(d3.axisRight(y1));
+  svg.append("text")
+      .attr("class","axistext")
+      .attr("x", width-30)
+      .attr("y", -5)
+      .attr("text-anchor", "end")
+      .text("教師總人數");
+  // Add the Y2 Axis
+  svg.append("g")
+      .attr("class", "axisTotal")
+      .attr("transform", "translate( " + (width-30) + ", 0 )")
+      .call(d3.axisLeft(y2));
+  
+  var charttexts = svg.selectAll(".chartText")
+      .data(tdata)
+      .enter()
+  charttexts.append("text")
+      .attr("class","chartText")
+      .attr("text-anchor", "start")
+      .attr("fill","black")
+      .attr("opacity",0)
+      .attr("x",function(d) { return x(d.year);})
+      .attr("y",function(d) { return y0(d.cla)-5;})
+      .text(function(d) {return d.cla;})
+      .attr("tag","cla")
+  charttexts.append("text")
+      .attr("class","chartText")
+      .attr("text-anchor", "start")
+      .attr("fill","black")
+      .attr("opacity",0)
+      .attr("x",function(d) { return x(d.year)+5;})
+      .attr("y",function(d) { return y1(d.agt)+5;})
+      .text(function(d) {return d.agt;})
+      .attr("tag","agt");
+  charttexts.append("text")
+      .attr("class","chartText")
+      .attr("text-anchor", "start")
+      .attr("fill","black")
+      .attr("opacity",0)
+      .attr("x",function(d) { return x(d.year);})
+      .attr("y",function(d) { return y2(d.ttl)-5;})
+      .text(function(d) {return d.ttl;})
+      .attr("tag","ttl");
+
+  
+  
+  
+  svg.append("text")
+      .attr("class","axistext")
+      .attr("x", width+55)
+      .attr("y", -5)
+      .attr("text-anchor", "start")
+      .text("代理教師人數");
+  
+  svg.append("text")
+      .attr("class","ex")
+      .attr("x",(width-200)/3)
+      .attr("y",height+35)
+      .text("班級數")
+      .attr("tag","cla")
+      .on("mouseover",function(){
+          var tag = d3.select(this).attr("tag")
+          svg.selectAll(".line").filter(function(){ 
+          return d3.select(this).attr("tag") != tag})
+          .attr('opacity',0.1);
+          svg.selectAll(".axisTotal,.axisAgent")
+          .attr('opacity',0.1);
+          svg.selectAll(".chartText").filter(function(){
+          return d3.select(this).attr("tag") == tag})
+          .attr('opacity',1);
+       })
+       .on("mouseout",function(){
+          var tag = d3.select(this).attr("tag")
+          svg.selectAll(".line").filter(function(){ 
+          return d3.select(this).attr("tag") != tag})
+          .attr('opacity',1);
+          svg.selectAll(".axisTotal,.axisAgent")
+          .attr('opacity',1);
+          svg.selectAll(".chartText").filter(function(){
+          return d3.select(this).attr("tag") == tag})
+          .attr('opacity',0);
+       })
+  svg.append("text")
+      .attr("class","ex")
+      .attr("x",2*(width-200)/3)
+      .attr("y",height+35)
+      .text("教師總人數")
+      .attr("tag","ttl")
+      .on("mouseover",function(){
+          var tag = d3.select(this).attr("tag")
+          svg.selectAll(".line").filter(function(){ 
+          return d3.select(this).attr("tag") != tag})
+          .attr('opacity',0.1);
+          svg.selectAll(".axisClass,.axisAgent")
+          .attr('opacity',0.1);
+          svg.selectAll(".chartText").filter(function(){
+          return d3.select(this).attr("tag") == tag})
+          .attr('opacity',1);
+       })
+       .on("mouseout",function(){
+          var tag = d3.select(this).attr("tag")
+          svg.selectAll(".line").filter(function(){ 
+          return d3.select(this).attr("tag") != tag})
+          .attr('opacity',1);
+          svg.selectAll(".axisClass,.axisAgent")
+          .attr('opacity',1);
+          svg.selectAll(".chartText").filter(function(){
+          return d3.select(this).attr("tag") == tag})
+          .attr('opacity',0);
+       })
+    svg.append("text")
+      .attr("class","ex")
+      .attr("x",(width-200))
+      .attr("y",height+35)
+      .text("代理教師人數")
+      .attr("tag","agt")
+      .on("mouseover",function(){
+          var tag = d3.select(this).attr("tag")
+          svg.selectAll(".line").filter(function(){ 
+          return d3.select(this).attr("tag") != tag})
+          .attr('opacity',0.1);
+          svg.selectAll(".axisClass,.axisTotal")
+          .attr('opacity',0.1);
+          svg.selectAll(".chartText").filter(function(){
+          return d3.select(this).attr("tag") == tag})
+          .attr('opacity',1);
+       })
+       .on("mouseout",function(){
+          var tag = d3.select(this).attr("tag")
+          svg.selectAll(".line").filter(function(){ 
+          return d3.select(this).attr("tag") != tag})
+          .attr('opacity',1);
+          svg.selectAll(".axisClass,.axisTotal")
+          .attr('opacity',1);
+          svg.selectAll(".chartText").filter(function(){
+          return d3.select(this).attr("tag") == tag})
+          .attr('opacity',0);
+       })
+  svg.append("circle")
+      .attr('r', 8)
+      .attr('transform', function(d){
+        return 'translate(' + ((width-200)/3-10) + ',' + (height+30) + ')'
+        })
+      .attr('fill', 'red');
+  svg.append("circle")
+      .attr('r', 8)
+      .attr('transform', function(d){
+        return 'translate(' + (2*(width-200)/3-10) + ',' + (height+30) + ')'
+        })
+      .attr('fill', 'green');
+  svg.append("circle")
+      .attr('r', 8)
+      .attr('transform', function(d){
+        return 'translate(' + ((width-200)-10) + ',' + (height+30) + ')'
+        })
+      .attr('fill', 'orange');
+  
+
+</script>
+</body>
